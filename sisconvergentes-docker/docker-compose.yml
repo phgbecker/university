@@ -1,0 +1,32 @@
+version: '3'
+services:
+
+  clinica-frontend:
+      image: tomcat
+      container_name: clinca_frontend
+      ports: 
+        - 8080:8080
+      volumes:
+        - ./frontend/ClinicaFrontend-0.0.1-SNAPSHOT.war:/usr/local/tomcat/webapps/ClinicaFrontend.war
+      depends_on:
+        - clinica-backend
+
+  clinica-backend:
+      image: tomcat
+      container_name: clinica_backend
+      ports: 
+        - 8081:8080
+      volumes:
+        - ./backend/ClinicaBackend-0.0.1-SNAPSHOT.war:/usr/local/tomcat/webapps/ClinicaBackend.war
+      depends_on:
+        - mysql-docker
+      links:
+        - mysql-docker
+
+  mysql-docker:
+    image: mysql:5.6
+    container_name: mysql-docker
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=clinica
+    restart: always

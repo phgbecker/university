@@ -1,0 +1,65 @@
+version: '3'
+
+services:
+
+  #
+  # Módulos AdventureWorks
+  #
+  # Observações
+  #  - Para baixar as imagens dos containers é necessário possuir uma conta no serviço "Docker Hub" (https://hub.docker.com/);
+  #  - Antes de baixar as imagens, realize o login em sua estação com o comando "docker login";
+  #  - Adicione o parâmetro "-d" ao comando "docker-compose up" para executar em modo background os serviços;
+  #  - Para não executar todos os containers de uma vez só, utilize o caracter "#" e comente os módulos não necessários;
+
+  modulo-vendas:
+      image: sistemasdeinformacao/modulo-vendas
+      container_name: modulo-vendas
+      ports:
+        - 8095:8095
+      depends_on:
+        - mysql-adventure-works
+        - eureka
+        - rabbitmq
+      links:
+        - mysql-adventure-works
+        - eureka
+        - rabbitmq
+
+
+  #
+  # Dependências
+  #
+
+  mysql-adventure-works:
+    image: sistemasdeinformacao/mysql-adventure-works
+    container_name: mysql-adventure-works
+    ports:
+      - 3307:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    restart: always
+
+
+  eureka:
+    image: springcloud/eureka
+    container_name: eureka
+    ports:
+      - 8761:8761
+
+      
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_ERLANG_COOKIE: "secret string"
+      RABBITMQ_NODENAME: rabbit1
+    volumes:
+      - ./rabbitMQ/rabbitmq.config:/etc/rabbitmq/rabbitmq.config
+      - ./rabbitMQ/definitions.json:/etc/rabbitmq/definitions.json
+    ports:
+      - 5671:5671
+      - 5672:5672
+      - 15671:15671
+      - 15672:15672
+    links:
+      - eureka
